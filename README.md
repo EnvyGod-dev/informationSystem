@@ -60,6 +60,7 @@ Sqlc нь SQL-ээс golang код үүсгэхэд ашиглана.
 
 <details>
 <summary>sqlc суулгах</summary>
+</details>
 
 #### MacOS
 
