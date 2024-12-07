@@ -178,8 +178,6 @@ project
 ## ⛏️ Ашигласан технологи <a name = "built_using"></a>
 
 - [sqlc](https://github.com/sqlc-dev/sqlc)
-- [grpc](https://github.com/grpc/grpc)
-- [rabbitmq](https://github.com/wagslane/go-rabbitmq)
 - [golang-migrate](https://github.com/golang-migrate/migrate)
 - [pgx](https://github.com/jackc/pgx)
 - [nextjs](https://nextjs.org/)
