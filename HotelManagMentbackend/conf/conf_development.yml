@@ -1,0 +1,15 @@
+# Database config
+database:
+  driver: postgres
+  url: postgresql://root:%s@localhost:5432/Namuunzul?sslmode=disable
+  password: "root"
+
+# Migration database config
+migration:
+  dir: file://db/migration
+
+# RSA keys for auth
+rsa:
+  size: 2048
+  public: ./utils/secure/rsa.pub
+  private: ./utils/secure/rsa
