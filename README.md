@@ -60,7 +60,6 @@ Sqlc нь SQL-ээс golang код үүсгэхэд ашиглана.
 
 <details>
 <summary>sqlc суулгах</summary>
-</details>
 
 #### MacOS
 
@@ -73,12 +72,28 @@ brew install sqlc
 ```sh
 go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 ```
+</details>
 
 #### Nodejs.org 
 
 Эндээс nodejs-ийг татаж суулгана Front-End ажиллуулахад хэрэгтэй
 <details>
 <summary>nodejs суулгах</summary>
+
+### Linux
+```sh
+sudo apt install nodejs
+```
+
+
+### MacOS
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew install node
+```
+
+
 </details>
 
 
