@@ -1,0 +1,63 @@
+# Go-той холбоотой файлууд
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go модулийн кэш
+/go.sum
+/go.mod~
+
+# Компиляцийн кэш
+*.o
+*.a
+
+# Тестүүдийн үр дүн
+*.test
+*.cover
+*.cov
+*.prof
+
+# IDE болон редакторууд
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+*.log
+*.tmp
+
+# Git merge conflict файлууд
+*.orig
+
+# Локал тохиргоо файлууд
+.env
+.env.local
+config.yaml
+config.local.yaml
+
+# Бусад OS-ны хамааралтай файлууд
+Thumbs.db
+.DS_Store
+*.bak
+*.old
+
+# Docker болон Kubernetes
+docker-compose.override.yml
+.dockerignore
+*.dockerfile
+
+# Тохиргоо файлууд
+*.lock
+*.bak
+*.backup
+*.log
+*.pid
+nohup.out
+
+# Кэш болон күүкий файлууд
+.cache/
