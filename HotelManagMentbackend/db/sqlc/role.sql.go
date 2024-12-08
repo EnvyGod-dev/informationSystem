@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createRole = `-- name: CreateRole :one
@@ -22,7 +21,7 @@ INSERT INTO "Role" (
 
 type CreateRoleParams struct {
 	RoleName    string
-	Description sql.NullString
+	Description string
 }
 
 func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
@@ -88,7 +87,7 @@ WHERE
 
 type UpdateRoleParams struct {
 	RoleName    string
-	Description sql.NullString
+	Description string
 	ID          int32
 }
 

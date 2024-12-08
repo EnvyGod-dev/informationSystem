@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"time"
 )
 
@@ -56,7 +55,7 @@ type GetAllUserRolesRow struct {
 	Userid      int32
 	UserName    string
 	RoleName    string
-	Description sql.NullString
+	Description string
 	AssignedAt  time.Time
 }
 
@@ -108,7 +107,7 @@ type GetUserRolesRow struct {
 	UserID      int32
 	RoleID      int32
 	RoleName    string
-	Description sql.NullString
+	Description string
 	AssignedAt  time.Time
 }
 

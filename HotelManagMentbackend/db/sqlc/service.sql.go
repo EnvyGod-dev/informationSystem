@@ -88,3 +88,22 @@ func (q *Queries) GetServicesByRoomID(ctx context.Context, roomid int32) ([]Serv
 	}
 	return items, nil
 }
+
+const updateStatus = `-- name: UpdateStatus :exec
+UPDATE
+    "Service"
+SET
+    "Status" = $1
+WHERE
+    "ID" = $2
+`
+
+type UpdateStatusParams struct {
+	Status string
+	ID     int32
+}
+
+func (q *Queries) UpdateStatus(ctx context.Context, arg UpdateStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateStatus, arg.Status, arg.ID)
+	return err
+}

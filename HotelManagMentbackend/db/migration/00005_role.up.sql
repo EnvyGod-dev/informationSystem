@@ -4,7 +4,7 @@ CREATE TABLE
     "Role" (
         "ID" serial PRIMARY KEY,
         "RoleName" VARCHAR(50) UNIQUE NOT NULL,
-        "Description" TEXT,
+        "Description" TEXT NOT null,
         CONSTRAINT "chk_valid_role_names" CHECK (
             "RoleName" IN ('admin', 'receptionist', 'housekeeper', 'finance manager', 'user')
         )

@@ -49,6 +49,95 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 	return i, err
 }
 
+const getDetailedPayments = `-- name: GetDetailedPayments :many
+SELECT 
+    p."ID" AS PaymentID,
+    p."Amount",
+    p."PaymentDate",
+    p."Status" AS PaymentStatus,
+    b."ID" AS BookingID,
+    b."StartDate",
+    b."EndDate",
+    b."TotalPrice",
+    b."Status" AS BookingStatus,
+    u."ID" AS UserID,
+    u."FirstName",
+    u."LastName",
+    u."Email",
+    r."ID" AS RoomID,
+    r."RoomType",
+    r."Price" AS RoomPrice
+FROM 
+    "Payment" p
+JOIN 
+    "Booking" b ON p."BookingID" = b."ID"
+JOIN 
+    "User" u ON b."UserID" = u."ID"
+JOIN 
+    "Room" r ON b."RoomID" = r."ID"
+ORDER BY 
+    p."PaymentDate" DESC
+`
+
+type GetDetailedPaymentsRow struct {
+	Paymentid     int32
+	Amount        string
+	PaymentDate   time.Time
+	Paymentstatus string
+	Bookingid     int32
+	StartDate     time.Time
+	EndDate       time.Time
+	TotalPrice    string
+	Bookingstatus string
+	Userid        int32
+	FirstName     string
+	LastName      string
+	Email         string
+	Roomid        int32
+	RoomType      string
+	Roomprice     string
+}
+
+func (q *Queries) GetDetailedPayments(ctx context.Context) ([]GetDetailedPaymentsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getDetailedPayments)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetDetailedPaymentsRow
+	for rows.Next() {
+		var i GetDetailedPaymentsRow
+		if err := rows.Scan(
+			&i.Paymentid,
+			&i.Amount,
+			&i.PaymentDate,
+			&i.Paymentstatus,
+			&i.Bookingid,
+			&i.StartDate,
+			&i.EndDate,
+			&i.TotalPrice,
+			&i.Bookingstatus,
+			&i.Userid,
+			&i.FirstName,
+			&i.LastName,
+			&i.Email,
+			&i.Roomid,
+			&i.RoomType,
+			&i.Roomprice,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPayments = `-- name: GetPayments :many
 SELECT 
     "ID", "BookingID", "Amount", "PaymentDate", "Status"
@@ -85,4 +174,89 @@ func (q *Queries) GetPayments(ctx context.Context) ([]Payment, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getUserPayments = `-- name: GetUserPayments :many
+SELECT 
+    p."ID" AS PaymentID,
+    p."Amount",
+    p."PaymentDate",
+    p."Status",
+    b."ID" AS BookingID,
+    b."StartDate",
+    b."EndDate",
+    b."TotalPrice",
+    b."Status" AS BookingStatus
+FROM 
+    "Payment" p
+JOIN 
+    "Booking" b ON p."BookingID" = b."ID"
+WHERE 
+    b."UserID" = $1
+ORDER BY 
+    p."PaymentDate" DESC
+`
+
+type GetUserPaymentsRow struct {
+	Paymentid     int32
+	Amount        string
+	PaymentDate   time.Time
+	Status        string
+	Bookingid     int32
+	StartDate     time.Time
+	EndDate       time.Time
+	TotalPrice    string
+	Bookingstatus string
+}
+
+func (q *Queries) GetUserPayments(ctx context.Context, userid int32) ([]GetUserPaymentsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserPayments, userid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserPaymentsRow
+	for rows.Next() {
+		var i GetUserPaymentsRow
+		if err := rows.Scan(
+			&i.Paymentid,
+			&i.Amount,
+			&i.PaymentDate,
+			&i.Status,
+			&i.Bookingid,
+			&i.StartDate,
+			&i.EndDate,
+			&i.TotalPrice,
+			&i.Bookingstatus,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updatePaymentStatus = `-- name: UpdatePaymentStatus :exec
+UPDATE
+    "Payment"
+SET
+    "Status" = $1
+WHERE
+    "ID" = $2
+`
+
+type UpdatePaymentStatusParams struct {
+	Status string
+	ID     int32
+}
+
+func (q *Queries) UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updatePaymentStatus, arg.Status, arg.ID)
+	return err
 }

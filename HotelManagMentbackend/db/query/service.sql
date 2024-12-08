@@ -20,3 +20,12 @@ WHERE
     "RoomID" = sqlc.arg('RoomID')
 ORDER BY 
     "RequestedAt" DESC;
+
+
+-- name: UpdateStatus :exec
+UPDATE
+    "Service"
+SET
+    "Status" = sqlc.arg('Status')
+WHERE
+    "ID" = sqlc.arg('ID');

@@ -5,7 +5,6 @@
 package db
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -40,7 +39,7 @@ type Payment struct {
 type Role struct {
 	ID          int32
 	RoleName    string
-	Description sql.NullString
+	Description string
 }
 
 type Room struct {
