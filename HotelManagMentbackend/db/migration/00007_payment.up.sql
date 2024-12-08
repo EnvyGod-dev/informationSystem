@@ -1,0 +1,12 @@
+-- TABLE: "Payment"
+BEGIN;
+
+CREATE TABLE "Payment" (
+    "ID" serial PRIMARY KEY,
+    "BookingID" INT NOT NULL REFERENCES "Booking" ("ID") ON DELETE CASCADE,
+    "Amount" NUMERIC(10, 2) NOT NULL,
+    "PaymentDate" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "Status" VARCHAR(50) NOT NULL
+) TABLESPACE pg_default;
+
+COMMIT;

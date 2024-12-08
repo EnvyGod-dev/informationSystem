@@ -1,0 +1,12 @@
+-- TABLE: "UserRole"
+BEGIN;
+
+CREATE TABLE
+    "UserRole" (
+        "UserID" INT NOT NULL REFERENCES "User" ("ID") ON DELETE CASCADE,
+        "RoleID" INT NOT NULL REFERENCES "Role" ("ID") ON DELETE CASCADE,
+        "Assigned_At" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY ("UserID", "RoleID")
+    ) TABLESPACE pg_default;
+
+COMMIT;

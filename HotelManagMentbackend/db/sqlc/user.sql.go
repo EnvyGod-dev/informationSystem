@@ -19,6 +19,9 @@ INSERT INTO
         "IsHashedPassword",
         "IsAdmin",
         "IsUser",
+        "IsReception",
+        "IsFinance",
+        "IsHouseKeeper",
         "IsActive"
     )
 VALUES
@@ -30,8 +33,11 @@ VALUES
         $5 :: TEXT,
         $6 :: BOOLEAN,
         $7 :: BOOLEAN,
-        $8 :: BOOLEAN
-    ) RETURNING "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsActive", "Created_At"
+        $8 :: BOOLEAN,
+        $9 :: BOOLEAN,
+        $10 :: BOOLEAN,
+        $11 :: BOOLEAN
+    ) RETURNING "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsReception", "IsFinance", "IsHouseKeeper", "IsActive", "Created_At"
 `
 
 type CreateUserParams struct {
@@ -42,6 +48,9 @@ type CreateUserParams struct {
 	IsHashedPassword string
 	IsAdmin          bool
 	IsUser           bool
+	IsReception      bool
+	IsFinance        bool
+	IsHouseKeeper    bool
 	IsActive         bool
 }
 
@@ -54,6 +63,9 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.IsHashedPassword,
 		arg.IsAdmin,
 		arg.IsUser,
+		arg.IsReception,
+		arg.IsFinance,
+		arg.IsHouseKeeper,
 		arg.IsActive,
 	)
 	var i User
@@ -66,8 +78,367 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.IsHashedPassword,
 		&i.IsAdmin,
 		&i.IsUser,
+		&i.IsReception,
+		&i.IsFinance,
+		&i.IsHouseKeeper,
 		&i.IsActive,
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const deleteUserByID = `-- name: DeleteUserByID :exec
+DELETE FROM
+    "User"
+WHERE
+    "ID" = $1
+`
+
+func (q *Queries) DeleteUserByID(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteUserByID, id)
+	return err
+}
+
+const findByUserId = `-- name: FindByUserId :one
+SELECT
+    "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsReception", "IsFinance", "IsHouseKeeper", "IsActive", "Created_At"
+FROM
+    "User"
+WHERE
+    "ID" = $1
+LIMIT 1
+`
+
+func (q *Queries) FindByUserId(ctx context.Context, id int32) (User, error) {
+	row := q.db.QueryRowContext(ctx, findByUserId, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.LastName,
+		&i.FirstName,
+		&i.UserName,
+		&i.Email,
+		&i.IsHashedPassword,
+		&i.IsAdmin,
+		&i.IsUser,
+		&i.IsReception,
+		&i.IsFinance,
+		&i.IsHouseKeeper,
+		&i.IsActive,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getListAdmin = `-- name: GetListAdmin :many
+SELECT
+    "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsReception", "IsFinance", "IsHouseKeeper", "IsActive", "Created_At"
+FROM
+    "User"
+WHERE
+    "IsAdmin" = TRUE
+    OR
+    "IsUser" = FALSE
+ORDER BY
+    "Created_At" DESC
+`
+
+func (q *Queries) GetListAdmin(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getListAdmin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.LastName,
+			&i.FirstName,
+			&i.UserName,
+			&i.Email,
+			&i.IsHashedPassword,
+			&i.IsAdmin,
+			&i.IsUser,
+			&i.IsReception,
+			&i.IsFinance,
+			&i.IsHouseKeeper,
+			&i.IsActive,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getListFinance = `-- name: GetListFinance :many
+SELECT
+    "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsReception", "IsFinance", "IsHouseKeeper", "IsActive", "Created_At"
+FROM
+    "User"
+WHERE
+    "IsFinance" = TRUE
+ORDER BY
+    "Created_At" DESC
+`
+
+func (q *Queries) GetListFinance(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getListFinance)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.LastName,
+			&i.FirstName,
+			&i.UserName,
+			&i.Email,
+			&i.IsHashedPassword,
+			&i.IsAdmin,
+			&i.IsUser,
+			&i.IsReception,
+			&i.IsFinance,
+			&i.IsHouseKeeper,
+			&i.IsActive,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getListHouseKeeper = `-- name: GetListHouseKeeper :many
+SELECT
+    "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsReception", "IsFinance", "IsHouseKeeper", "IsActive", "Created_At"
+FROM
+    "User"
+WHERE
+    "IsHouseKeeper" = TRUE
+ORDER BY
+    "Created_At" DESC
+`
+
+func (q *Queries) GetListHouseKeeper(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getListHouseKeeper)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.LastName,
+			&i.FirstName,
+			&i.UserName,
+			&i.Email,
+			&i.IsHashedPassword,
+			&i.IsAdmin,
+			&i.IsUser,
+			&i.IsReception,
+			&i.IsFinance,
+			&i.IsHouseKeeper,
+			&i.IsActive,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getListReception = `-- name: GetListReception :many
+SELECT
+    "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsReception", "IsFinance", "IsHouseKeeper", "IsActive", "Created_At"
+FROM
+    "User"
+WHERE
+    "IsReception" = TRUE
+ORDER BY
+    "Created_At" DESC
+`
+
+func (q *Queries) GetListReception(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getListReception)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.LastName,
+			&i.FirstName,
+			&i.UserName,
+			&i.Email,
+			&i.IsHashedPassword,
+			&i.IsAdmin,
+			&i.IsUser,
+			&i.IsReception,
+			&i.IsFinance,
+			&i.IsHouseKeeper,
+			&i.IsActive,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getListUser = `-- name: GetListUser :many
+SELECT 
+    "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsReception", "IsFinance", "IsHouseKeeper", "IsActive", "Created_At"
+FROM
+    "User"
+WHERE
+    "IsAdmin" = FALSE 
+    OR
+    "IsUser" = TRUE
+ORDER BY 
+    "Created_At" DESC
+`
+
+func (q *Queries) GetListUser(ctx context.Context) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getListUser)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.LastName,
+			&i.FirstName,
+			&i.UserName,
+			&i.Email,
+			&i.IsHashedPassword,
+			&i.IsAdmin,
+			&i.IsUser,
+			&i.IsReception,
+			&i.IsFinance,
+			&i.IsHouseKeeper,
+			&i.IsActive,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserName = `-- name: GetUserName :one
+SELECT
+    "ID", "LastName", "FirstName", "UserName", "Email", "IsHashedPassword", "IsAdmin", "IsUser", "IsReception", "IsFinance", "IsHouseKeeper", "IsActive", "Created_At"
+FROM
+    "User"
+WHERE
+    "UserName" = $1
+LIMIT 1
+`
+
+func (q *Queries) GetUserName(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserName, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.LastName,
+		&i.FirstName,
+		&i.UserName,
+		&i.Email,
+		&i.IsHashedPassword,
+		&i.IsAdmin,
+		&i.IsUser,
+		&i.IsReception,
+		&i.IsFinance,
+		&i.IsHouseKeeper,
+		&i.IsActive,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateUserEmail = `-- name: UpdateUserEmail :exec
+UPDATE
+    "User"
+SET 
+    "Email" = $1
+WHERE
+    "ID" = $2
+`
+
+type UpdateUserEmailParams struct {
+	Email string
+	ID    int32
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
+	return err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE
+    "User"
+SET
+    "IsHashedPassword" = $1
+WHERE
+    "ID" = $2
+`
+
+type UpdateUserPasswordParams struct {
+	IsHashedPassword string
+	ID               int32
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserPassword, arg.IsHashedPassword, arg.ID)
+	return err
 }

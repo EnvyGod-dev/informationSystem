@@ -5,8 +5,60 @@
 package db
 
 import (
+	"database/sql"
 	"time"
 )
+
+type Booking struct {
+	ID         int32
+	UserID     int32
+	RoomID     int32
+	StartDate  time.Time
+	EndDate    time.Time
+	TotalPrice string
+	Status     string
+	CreatedAt  time.Time
+}
+
+type Hotel struct {
+	ID        int32
+	Name      string
+	Address   string
+	City      string
+	Rating    sql.NullString
+	CreatedAt time.Time
+}
+
+type Payment struct {
+	ID          int32
+	BookingID   int32
+	Amount      string
+	PaymentDate time.Time
+	Status      string
+}
+
+type Role struct {
+	ID          int32
+	RoleName    string
+	Description sql.NullString
+}
+
+type Room struct {
+	ID          int32
+	HotelID     int32
+	RoomType    string
+	Price       string
+	IsAvailable bool
+	CreatedAt   time.Time
+}
+
+type Service struct {
+	ID          int32
+	RoomID      int32
+	Description string
+	RequestedAt time.Time
+	Status      string
+}
 
 type User struct {
 	ID               int32
@@ -17,6 +69,15 @@ type User struct {
 	IsHashedPassword string
 	IsAdmin          bool
 	IsUser           bool
+	IsReception      bool
+	IsFinance        bool
+	IsHouseKeeper    bool
 	IsActive         bool
 	CreatedAt        time.Time
+}
+
+type UserRole struct {
+	UserID     int32
+	RoleID     int32
+	AssignedAt time.Time
 }

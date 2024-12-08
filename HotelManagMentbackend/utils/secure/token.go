@@ -17,9 +17,12 @@ var ErrIncorrectJWTStructure = errors.New("incorrect JWT structure")
 
 type Payload struct {
 	jwt.StandardClaims
-	AdminId      int32 `json:"adminId"`
-	IsAdmin      bool  `json:"is_admin"`
-	IsSuperAdmin bool  `json:"is_super_admin"`
+	Role        string `json:"role"`
+	UserId      int32  `json:"user_id"`      // Хэрэглэгчийн ID
+	IsAdmin     bool   `json:"is_admin"`     // Админ эрхтэй эсэх
+	IsUser      bool   `json:"is_user"`      // Хэрэглэгч эрхтэй эсэх
+	IsReception bool   `json:"is_reception"` // Receptionist эрхтэй эсэх
+	IsFinance   bool   `json:"is_finance"`   // Finance эрхтэй эсэх
 }
 
 // Types can have associated functions which are equivalent of C# extensions.
@@ -37,59 +40,49 @@ func (pl *Payload) ToJSON(w io.Writer) error {
 // Generates a JWT using RS512 (RSA public key cryptography based) hashing algorithm.
 // Includes custom claims in addition to the standard JWT claims.
 
-func IssueToken(adminId int32, isAdmin, isSuperAdmin bool, kp *RsaKey) (string, error) {
-	claims := Payload{
+func IssueToken(UserId int32, isAdmin, isUser, isReception, isFinance bool, kp *RsaKey) (string, error) {
+	claims := Payload{ // Токенд агуулагдах мэдээлэл
 		StandardClaims: jwt.StandardClaims{
-			IssuedAt: time.Now().Unix(),
-			Issuer:   "orchid-auth-service",
+			IssuedAt:  time.Now().Unix(),                      // Токен үүсгэсэн цаг
+			Issuer:    "hotel-management-service",             // Токены үүсгэсэн систем
+			ExpiresAt: time.Now().UTC().Unix() + TokenSeconds, // Токен дуусах хугацаа
 		},
-		AdminId:      adminId,
-		IsAdmin:      isAdmin,
-		IsSuperAdmin: isSuperAdmin,
+		UserId:      UserId,      // Хэрэглэгчийн ID
+		IsAdmin:     isAdmin,     // Админ эрхтэй эсэх
+		IsUser:      isUser,      // Хэрэглэгч эрхтэй эсэх
+		IsReception: isReception, // Receptionist эрхтэй эсэх
+		IsFinance:   isFinance,   // Finance эрхтэй эсэх
+
 	}
 
-	// Token expires after defined period
-	claims.StandardClaims.ExpiresAt = time.Now().UTC().Unix() + TokenSeconds
-
-	// Get signing method and sign the token
-	method := jwt.GetSigningMethod(kp.Algo)
-	token := jwt.NewWithClaims(method, claims)
-
-	stoken, err := token.SignedString(kp.GetK1())
+	method := jwt.GetSigningMethod(kp.Algo)       // Алгоритмыг сонгох (RS512)
+	token := jwt.NewWithClaims(method, claims)    // JWT токен үүсгэх
+	stoken, err := token.SignedString(kp.GetK1()) // Private Key ашиглан гарын үсэг зурж токен үүсгэх
 	if err != nil {
 		return "", err
 	}
 
-	return stoken, nil
+	return stoken, nil // Үүссэн токен буцаах
 }
 
 // Computes signature, verifies the JWT authenticity, and returns the JWT payload.
 // Additionally, checks if the user is an Admin or Super Admin.
-func VerifyToken(tokenStr string, kp *RsaKey) (jwt.MapClaims, bool, bool, error) {
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+func VerifyToken(tokenStr string, kp *RsaKey) (*Payload, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &Payload{}, func(token *jwt.Token) (interface{}, error) {
+		if kp == nil {
+			return nil, errors.New("RSA key not provided")
+		}
 		return kp.GetK2(), nil
 	})
 
-	if err != nil {
-		return nil, false, false, err
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid token")
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return nil, false, false, errors.New("invalid token")
+	claims, ok := token.Claims.(*Payload)
+	if !ok {
+		return nil, errors.New("invalid token claims")
 	}
 
-	// Check if the user is an admin
-	isAdmin := false
-	if adminVal, ok := claims["is_admin"].(bool); ok {
-		isAdmin = adminVal
-	}
-
-	// Check if the user is a super admin
-	isSuperAdmin := false
-	if superAdminVal, ok := claims["is_super_admin"].(bool); ok {
-		isSuperAdmin = superAdminVal
-	}
-
-	return claims, isAdmin, isSuperAdmin, nil
+	return claims, nil
 }

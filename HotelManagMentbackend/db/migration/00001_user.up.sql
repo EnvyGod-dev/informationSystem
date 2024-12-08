@@ -11,6 +11,9 @@ CREATE TABLE
         "IsHashedPassword" TEXT NOT NULL,
         "IsAdmin" BOOLEAN DEFAULT FALSE NOT NULL,
         "IsUser" BOOLEAN DEFAULT FALSE not NULL,
+        "IsReception" BOOLEAN DEFAULT FALSE NOT NULL,
+        "IsFinance" BOOLEAN DEFAULT FALSE not NULL,
+        "IsHouseKeeper" BOOLEAN DEFAULT FALSE not NULL,
         "IsActive" BOOLEAN DEFAULT TRUE NOT NULL,
         "Created_At" TIMESTAMP
         WITH

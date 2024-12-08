@@ -1,0 +1,14 @@
+-- TABLE: "Room"
+BEGIN;
+
+CREATE TABLE
+    "Room" (
+        "ID" serial PRIMARY KEY,
+        "HotelID" INT NOT NULL REFERENCES "Hotel" ("ID") ON DELETE CASCADE,
+        "RoomType" VARCHAR(100) NOT NULL,
+        "Price" NUMERIC(10, 2) NOT NULL,
+        "IsAvailable" BOOLEAN DEFAULT TRUE NOT NULL,
+        "Created_At" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+    ) TABLESPACE pg_default;
+
+COMMIT;
