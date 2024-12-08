@@ -72,6 +72,24 @@ func (q *Queries) DeleteBooking(ctx context.Context, id int32) error {
 	return err
 }
 
+const deleteBookingIfOwner = `-- name: DeleteBookingIfOwner :exec
+DELETE FROM 
+    "Booking"
+WHERE 
+    "ID" = $1 AND
+    "UserID" = $2
+`
+
+type DeleteBookingIfOwnerParams struct {
+	ID     int32
+	UserID int32
+}
+
+func (q *Queries) DeleteBookingIfOwner(ctx context.Context, arg DeleteBookingIfOwnerParams) error {
+	_, err := q.db.ExecContext(ctx, deleteBookingIfOwner, arg.ID, arg.UserID)
+	return err
+}
+
 const getActiveOrNewBookings = `-- name: GetActiveOrNewBookings :many
 SELECT 
     "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
@@ -204,6 +222,47 @@ FROM
 
 func (q *Queries) GetListBooking(ctx context.Context) ([]Booking, error) {
 	rows, err := q.db.QueryContext(ctx, getListBooking)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Booking
+	for rows.Next() {
+		var i Booking
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.RoomID,
+			&i.StartDate,
+			&i.EndDate,
+			&i.TotalPrice,
+			&i.Status,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserBookings = `-- name: GetUserBookings :many
+SELECT 
+    "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
+FROM 
+    "Booking"
+WHERE 
+    "UserID" = $1
+`
+
+func (q *Queries) GetUserBookings(ctx context.Context, userid int32) ([]Booking, error) {
+	rows, err := q.db.QueryContext(ctx, getUserBookings, userid)
 	if err != nil {
 		return nil, err
 	}

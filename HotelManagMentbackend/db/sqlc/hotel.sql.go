@@ -7,7 +7,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createHotel = `-- name: CreateHotel :one
@@ -28,7 +27,7 @@ type CreateHotelParams struct {
 	Name    string
 	Address string
 	City    string
-	Rating  sql.NullString
+	Rating  string
 }
 
 func (q *Queries) CreateHotel(ctx context.Context, arg CreateHotelParams) (Hotel, error) {
@@ -212,7 +211,7 @@ WHERE
 `
 
 type UpdateByRatingParams struct {
-	Rating sql.NullString
+	Rating string
 	ID     int32
 }
 

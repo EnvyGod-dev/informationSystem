@@ -70,3 +70,18 @@ FROM
     "Booking"
 ORDER BY 
     "StartDate" ASC;
+
+-- name: GetUserBookings :many
+SELECT 
+    *
+FROM 
+    "Booking"
+WHERE 
+    "UserID" = sqlc.arg('UserID');
+
+-- name: DeleteBookingIfOwner :exec
+DELETE FROM 
+    "Booking"
+WHERE 
+    "ID" = sqlc.arg('ID') AND
+    "UserID" = sqlc.arg('UserID');

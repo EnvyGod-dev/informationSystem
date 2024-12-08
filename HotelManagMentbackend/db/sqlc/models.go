@@ -25,7 +25,7 @@ type Hotel struct {
 	Name      string
 	Address   string
 	City      string
-	Rating    sql.NullString
+	Rating    string
 	CreatedAt time.Time
 }
 
