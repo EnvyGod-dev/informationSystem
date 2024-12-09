@@ -55,7 +55,7 @@ JOIN
     "Room" r ON b."RoomID" = r."ID"
 ORDER BY 
     p."PaymentDate" DESC;
-    
+
 -- name: GetUserPayments :many
 SELECT 
     p."ID" AS PaymentID,
