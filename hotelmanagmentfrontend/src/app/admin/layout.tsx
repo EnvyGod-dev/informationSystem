@@ -7,19 +7,20 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
-    const pathname = usePathname();
-    const isAuthenticated = useAdminAuth();
-    const [loading, setLoading] = useState(true);
+    const pathname = usePathname(); // Одоогийн замыг авах
+    const isAuthenticated = useAdminAuth(); // Admin эрхийг шалгах
+    const [loading, setLoading] = useState(true); // Ачааллаж байгаа эсэхийг хадгалах
 
     useEffect(() => {
-        // Check authentication and redirect if needed
+        // Хэрэглэгчийн эрхийг шалгаж, шаардлагатай бол /admin/auth руу шилжүүлэх
         if (!isAuthenticated && pathname !== '/admin/auth') {
-            router.push('/admin/auth');
+            router.push('/admin/auth'); // Хэрэглэгч нэвтрээгүй бол login хуудас руу шилжүүлнэ
         } else {
-            setLoading(false);
+            setLoading(false); // Нэвтэрсэн тохиолдолд ачаалал дуусна
         }
     }, [isAuthenticated, pathname, router]);
 
+    // Ачаалал дуусаагүй үед spinner (дугуй ачааллын дүрс) харуулна
     if (loading) {
         return (
             <Box
@@ -27,33 +28,33 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    height: '100vh',
+                    height: '100vh', // Цонхны өндрийн хэмжээгээр төвд байрлана
                 }}
             >
-                <CircularProgress />
+                <CircularProgress /> {/* Spinner дүрс */}
             </Box>
         );
     }
 
-    // Exclude Sidebar for `/admin/auth` route
+    // '/admin/auth' зам дээр Sidebar-ийг харуулахгүй
     if (pathname === '/admin/auth') {
         return (
             <Box>
                 <CssBaseline />
                 <Box component="main" sx={{ p: 3 }}>
-                    {children}
+                    {children} {/* Тухайн хуудасны контент */}
                 </Box>
             </Box>
         );
     }
 
-    // Layout with Sidebar for other admin routes
+    // Бусад admin зам дээр Sidebar-тэй layout
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AdminSidebar />
+            <AdminSidebar /> {/* Sidebar (цэс) нэмэх */}
             <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                {children}
+                {children} {/* Тухайн хуудасны контент */}
             </Box>
         </Box>
     );

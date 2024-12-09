@@ -6,20 +6,20 @@ import { AdminList } from '@/utils/api/fetch/admin';
 
 interface User {
     ID: number;
-    FirstName: string;
-    LastName: string;
-    Email: string;
+    FirstName: string | null; // Allow null
+    LastName: string | null; // Allow null
+    Email: string | null; // Allow null
     IsUser: boolean;
-    CreatedAt: string;
+    CreatedAt: string | null; // Allow null
 }
 
 interface Admin {
     ID: number;
-    FirstName: string;
-    LastName: string;
-    Email: string;
+    FirstName: string | null; // Allow null
+    LastName: string | null; // Allow null
+    Email: string | null; // Allow null
     IsAdmin: boolean;
-    CreatedAt: string;
+    CreatedAt: string | null; // Allow null
 }
 
 const AdminDashboard = () => {
@@ -33,8 +33,8 @@ const AdminDashboard = () => {
             try {
                 setLoading(true);
                 const [users, admins] = await Promise.all([GetListUser(), AdminList()]);
-                setUserList(users);
-                setAdminList(admins);
+                setUserList(users || []); // Ensure users is an array
+                setAdminList(admins || []); // Ensure admins is an array
                 setLoading(false);
             } catch (err: any) {
                 console.error('Error fetching data:', err.message);
@@ -95,11 +95,11 @@ const AdminDashboard = () => {
                         {userList.length > 0 ? (
                             userList.map((user) => (
                                 <Typography key={user.ID}>
-                                    {user.FirstName} {user.LastName} - {user.Email}
+                                    {user.FirstName ?? 'Unknown'} {user.LastName ?? 'User'} - {user.Email ?? 'No Email'}
                                 </Typography>
                             ))
                         ) : (
-                            <Typography>No users found.</Typography>
+                            <Typography>Одоогоор дата алга байна</Typography>
                         )}
                     </Paper>
                 </Grid>
@@ -113,11 +113,11 @@ const AdminDashboard = () => {
                         {adminList.length > 0 ? (
                             adminList.map((admin) => (
                                 <Typography key={admin.ID}>
-                                    {admin.FirstName} {admin.LastName} - {admin.Email}
+                                    {admin.FirstName ?? 'Unknown'} {admin.LastName ?? 'Admin'} - {admin.Email ?? 'No Email'}
                                 </Typography>
                             ))
                         ) : (
-                            <Typography>No admins found.</Typography>
+                            <Typography>Одоогоор дата алга байна</Typography>
                         )}
                     </Paper>
                 </Grid>
