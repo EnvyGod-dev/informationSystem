@@ -7,11 +7,12 @@ import RoomServiceIcon from '@mui/icons-material/RoomService';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import PaymentIcon from '@mui/icons-material/Payment';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useRouter } from 'next/navigation';
-import { adminHome, adminHotel, adminLogOut, adminOrder, adminPayment, adminRoom, adminUser } from '@/utils/route/path';
+import { useRouter, usePathname } from 'next/navigation';
+import { adminDashboard, adminHotel, adminOrder, adminPayment, adminRoom, adminUser } from '@/utils/route/path';
 
 const AdminSidebar = () => {
     const router = useRouter();
+    const pathname = usePathname(); // Get current route
 
     const handleLogout = () => {
         localStorage.removeItem('adminToken');
@@ -19,9 +20,8 @@ const AdminSidebar = () => {
         router.push('/admin/auth');
     };
 
-
     const menuItems = [
-        { text: 'Dashboard', icon: <PeopleIcon />, path: adminHome },
+        { text: 'Dashboard', icon: <PeopleIcon />, path: adminDashboard },
         { text: 'Хэрэглэгчийн бүртгэл', icon: <PeopleIcon />, path: adminUser },
         { text: 'Зочид буудал', icon: <HotelIcon />, path: adminHotel },
         { text: 'Өрөө', icon: <RoomServiceIcon />, path: adminRoom },
@@ -46,21 +46,34 @@ const AdminSidebar = () => {
             <List>
                 {menuItems.map((item, index) => (
                     <ListItem
-                        component="div"
                         key={index}
                         onClick={() => router.push(item.path)}
                         sx={{
                             cursor: 'pointer',
+                            backgroundColor: pathname === item.path ? '#e0f7fa' : 'transparent', // Highlight active item
                             '&:hover': { backgroundColor: '#f5f5f5' },
+                            transition: 'background-color 0.3s', // Smooth transition
                         }}
                     >
-                        <ListItemIcon>{item.icon}</ListItemIcon>
-                        <ListItemText primary={item.text} />
+                        <ListItemIcon
+                            sx={{
+                                color: pathname === item.path ? '#00796b' : 'inherit', // Change icon color
+                                transition: 'color 0.3s', // Smooth transition
+                            }}
+                        >
+                            {item.icon}
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={item.text}
+                            sx={{
+                                color: pathname === item.path ? '#00796b' : 'inherit', // Change text color
+                                transition: 'color 0.3s', // Smooth transition
+                            }}
+                        />
                     </ListItem>
                 ))}
 
                 <ListItem
-                    component="div"
                     onClick={handleLogout}
                     sx={{
                         cursor: 'pointer',

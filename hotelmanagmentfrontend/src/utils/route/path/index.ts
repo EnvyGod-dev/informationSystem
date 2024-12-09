@@ -1,4 +1,4 @@
-export const adminHome = "/admin/"
+export const adminDashboard = "/admin/"
 export const adminUser = "/admin/user"
 export const adminHotel = "/admin/hotel"
 export const adminRoom = "/admin/room"

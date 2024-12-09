@@ -17,7 +17,7 @@ import {
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useRouter } from 'next/navigation';
 import { adminUser } from '../../../utils/api/auth/login';
-import { adminHome } from '@/utils/route/path';
+import { adminDashboard } from '@/utils/route/path';
 
 const AdminLogin = () => {
     const [username, setUsername] = useState('');
@@ -29,7 +29,7 @@ const AdminLogin = () => {
     const handleCloseModal = () => {
         setModalOpen(false);
         if (modalMessage.includes('Амжилттай')) {
-            setTimeout(() => router.push(adminHome), 500); // Delay for modal feedback
+            setTimeout(() => router.push(adminDashboard), 500);
         }
     };
 
