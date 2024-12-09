@@ -22,6 +22,7 @@ SELECT
     r."RoomType",
     r."Price",
     r."IsAvailable",
+    r."RoomImg",
     h."Name" AS HotelName,
     h."Address" AS HotelAddress
 FROM
@@ -35,9 +36,12 @@ ORDER BY
 -- name: GetAllRoomsWithHotels :many
 SELECT
     r."ID" AS RoomID,
+    r."ID",
     r."RoomType",
+    r."HotelID",
     r."Price",
     r."IsAvailable",
+    r."RoomImg",
     h."ID" AS HotelID,
     h."Name" AS HotelName,
     h."Address" AS HotelAddress

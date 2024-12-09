@@ -1,22 +1,25 @@
 -- name: CreatePayment :one
-INSERT INTO "Payment" (
-    "BookingID",
-    "Amount",
-    "PaymentDate",
-    "Status"
-) VALUES (
-    sqlc.arg('BookingID'),
-    sqlc.arg('Amount'),
-    sqlc.arg('PaymentDate'),
-    sqlc.arg('Status')
-) RETURNING *;
+INSERT INTO
+    "Payment" (
+        "BookingID",
+        "Amount",
+        "PaymentDate",
+        "Status"
+    )
+VALUES
+    (
+        sqlc.arg('BookingID'),
+        sqlc.arg('Amount'),
+        sqlc.arg('PaymentDate'),
+        sqlc.arg('Status')
+    ) RETURNING *;
 
 -- name: GetPayments :many
-SELECT 
+SELECT
     *
-FROM 
+FROM
     "Payment"
-ORDER BY 
+ORDER BY
     "PaymentDate" DESC;
 
 -- name: UpdatePaymentStatus :exec
@@ -28,7 +31,7 @@ WHERE
     "ID" = sqlc.arg('ID');
 
 -- name: GetDetailedPayments :many
-SELECT 
+SELECT
     p."ID" AS PaymentID,
     p."Amount",
     p."PaymentDate",
@@ -45,19 +48,16 @@ SELECT
     r."ID" AS RoomID,
     r."RoomType",
     r."Price" AS RoomPrice
-FROM 
+FROM
     "Payment" p
-JOIN 
-    "Booking" b ON p."BookingID" = b."ID"
-JOIN 
-    "User" u ON b."UserID" = u."ID"
-JOIN 
-    "Room" r ON b."RoomID" = r."ID"
-ORDER BY 
+    JOIN "Booking" b ON p."BookingID" = b."ID"
+    JOIN "User" u ON b."UserID" = u."ID"
+    JOIN "Room" r ON b."RoomID" = r."ID"
+ORDER BY
     p."PaymentDate" DESC;
 
 -- name: GetUserPayments :many
-SELECT 
+SELECT
     p."ID" AS PaymentID,
     p."Amount",
     p."PaymentDate",
@@ -67,11 +67,26 @@ SELECT
     b."EndDate",
     b."TotalPrice",
     b."Status" AS BookingStatus
-FROM 
+FROM
     "Payment" p
-JOIN 
-    "Booking" b ON p."BookingID" = b."ID"
-WHERE 
+    JOIN "Booking" b ON p."BookingID" = b."ID"
+WHERE
     b."UserID" = sqlc.arg('UserID')
-ORDER BY 
+ORDER BY
     p."PaymentDate" DESC;
+
+-- name: FindByPaymentID :one
+SELECT
+    *
+FROM
+    "Payment"
+WHERE
+    "ID" = sqlc.arg('ID')
+LIMIT
+    1;
+
+-- name: DeletePaymentId :exec
+DELETE FROM
+    "Payment"
+WHERE
+    "ID" = sqlc.arg('ID');

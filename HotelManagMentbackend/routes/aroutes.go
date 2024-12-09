@@ -68,6 +68,7 @@ func adminRoutes(app *fiber.App, hd *handlers.Handlers) {
 	payment.Get("/", hd.GetPayments)                             // Бүх төлбөрүүдийг харах
 	payment.Patch("/status", hd.UpdatePaymentStatus)             // Төлбөрийн статус шинэчлэх
 	payment.Get("/detailed", hd.GetDetailedPayments)             // Төлбөрүүдийг дэлгэрэнгүй харах
+	payment.Delete("/delete/:id", hd.DeletePayment)
 
 }
 

@@ -60,9 +60,12 @@ func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, e
 const getAllRoomsWithHotels = `-- name: GetAllRoomsWithHotels :many
 SELECT
     r."ID" AS RoomID,
+    r."ID",
     r."RoomType",
+    r."HotelID",
     r."Price",
     r."IsAvailable",
+    r."RoomImg",
     h."ID" AS HotelID,
     h."Name" AS HotelName,
     h."Address" AS HotelAddress
@@ -76,9 +79,12 @@ ORDER BY
 
 type GetAllRoomsWithHotelsRow struct {
 	Roomid       int32
+	ID           int32
 	RoomType     string
+	HotelID      int32
 	Price        string
 	IsAvailable  bool
+	RoomImg      string
 	Hotelid      int32
 	Hotelname    string
 	Hoteladdress string
@@ -95,9 +101,12 @@ func (q *Queries) GetAllRoomsWithHotels(ctx context.Context) ([]GetAllRoomsWithH
 		var i GetAllRoomsWithHotelsRow
 		if err := rows.Scan(
 			&i.Roomid,
+			&i.ID,
 			&i.RoomType,
+			&i.HotelID,
 			&i.Price,
 			&i.IsAvailable,
+			&i.RoomImg,
 			&i.Hotelid,
 			&i.Hotelname,
 			&i.Hoteladdress,
@@ -121,6 +130,7 @@ SELECT
     r."RoomType",
     r."Price",
     r."IsAvailable",
+    r."RoomImg",
     h."Name" AS HotelName,
     h."Address" AS HotelAddress
 FROM
@@ -137,6 +147,7 @@ type GetRoomsByHotelIDRow struct {
 	RoomType     string
 	Price        string
 	IsAvailable  bool
+	RoomImg      string
 	Hotelname    string
 	Hoteladdress string
 }
@@ -155,6 +166,7 @@ func (q *Queries) GetRoomsByHotelID(ctx context.Context, id int32) ([]GetRoomsBy
 			&i.RoomType,
 			&i.Price,
 			&i.IsAvailable,
+			&i.RoomImg,
 			&i.Hotelname,
 			&i.Hoteladdress,
 		); err != nil {

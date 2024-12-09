@@ -11,17 +11,20 @@ import (
 )
 
 const createPayment = `-- name: CreatePayment :one
-INSERT INTO "Payment" (
-    "BookingID",
-    "Amount",
-    "PaymentDate",
-    "Status"
-) VALUES (
-    $1,
-    $2,
-    $3,
-    $4
-) RETURNING "ID", "BookingID", "Amount", "PaymentDate", "Status"
+INSERT INTO
+    "Payment" (
+        "BookingID",
+        "Amount",
+        "PaymentDate",
+        "Status"
+    )
+VALUES
+    (
+        $1,
+        $2,
+        $3,
+        $4
+    ) RETURNING "ID", "BookingID", "Amount", "PaymentDate", "Status"
 `
 
 type CreatePaymentParams struct {
@@ -49,8 +52,44 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 	return i, err
 }
 
+const deletePaymentId = `-- name: DeletePaymentId :exec
+DELETE FROM
+    "Payment"
+WHERE
+    "ID" = $1
+`
+
+func (q *Queries) DeletePaymentId(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deletePaymentId, id)
+	return err
+}
+
+const findByPaymentID = `-- name: FindByPaymentID :one
+SELECT
+    "ID", "BookingID", "Amount", "PaymentDate", "Status"
+FROM
+    "Payment"
+WHERE
+    "ID" = $1
+LIMIT
+    1
+`
+
+func (q *Queries) FindByPaymentID(ctx context.Context, id int32) (Payment, error) {
+	row := q.db.QueryRowContext(ctx, findByPaymentID, id)
+	var i Payment
+	err := row.Scan(
+		&i.ID,
+		&i.BookingID,
+		&i.Amount,
+		&i.PaymentDate,
+		&i.Status,
+	)
+	return i, err
+}
+
 const getDetailedPayments = `-- name: GetDetailedPayments :many
-SELECT 
+SELECT
     p."ID" AS PaymentID,
     p."Amount",
     p."PaymentDate",
@@ -67,15 +106,12 @@ SELECT
     r."ID" AS RoomID,
     r."RoomType",
     r."Price" AS RoomPrice
-FROM 
+FROM
     "Payment" p
-JOIN 
-    "Booking" b ON p."BookingID" = b."ID"
-JOIN 
-    "User" u ON b."UserID" = u."ID"
-JOIN 
-    "Room" r ON b."RoomID" = r."ID"
-ORDER BY 
+    JOIN "Booking" b ON p."BookingID" = b."ID"
+    JOIN "User" u ON b."UserID" = u."ID"
+    JOIN "Room" r ON b."RoomID" = r."ID"
+ORDER BY
     p."PaymentDate" DESC
 `
 
@@ -139,11 +175,11 @@ func (q *Queries) GetDetailedPayments(ctx context.Context) ([]GetDetailedPayment
 }
 
 const getPayments = `-- name: GetPayments :many
-SELECT 
+SELECT
     "ID", "BookingID", "Amount", "PaymentDate", "Status"
-FROM 
+FROM
     "Payment"
-ORDER BY 
+ORDER BY
     "PaymentDate" DESC
 `
 
@@ -177,7 +213,7 @@ func (q *Queries) GetPayments(ctx context.Context) ([]Payment, error) {
 }
 
 const getUserPayments = `-- name: GetUserPayments :many
-SELECT 
+SELECT
     p."ID" AS PaymentID,
     p."Amount",
     p."PaymentDate",
@@ -187,13 +223,12 @@ SELECT
     b."EndDate",
     b."TotalPrice",
     b."Status" AS BookingStatus
-FROM 
+FROM
     "Payment" p
-JOIN 
-    "Booking" b ON p."BookingID" = b."ID"
-WHERE 
+    JOIN "Booking" b ON p."BookingID" = b."ID"
+WHERE
     b."UserID" = $1
-ORDER BY 
+ORDER BY
     p."PaymentDate" DESC
 `
 

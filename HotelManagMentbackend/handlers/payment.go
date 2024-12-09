@@ -162,3 +162,25 @@ func (hd *Handlers) GetUserPayments(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(payments)
 }
+
+func (hd *Handlers) DeletePayment(ctx *fiber.Ctx) error {
+	queries, _, _ := hd.queries()
+
+	DeletePaymentIDSTR := ctx.Params("id")
+	DeletePaymentID, err := strconv.Atoi(DeletePaymentIDSTR)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"err": err})
+	}
+	_, err = queries.FindByPaymentID(ctx.Context(), int32(DeletePaymentID))
+	if err != nil {
+		slog.Error("unable to find payment id", slog.Any("Err", err))
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"err": err})
+	}
+
+	err = queries.DeletePaymentId(ctx.Context(), int32(DeletePaymentID))
+	if err != nil {
+		slog.Error("unable to delete payment", slog.Any("Err", err))
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"err": err})
+	}
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"msg": "deleted successully"})
+}
