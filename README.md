@@ -13,12 +13,12 @@
 
 ## HTTP config git бол
 ```sh
-    git clone -b developer https://github.com/PsychicWorms/negunMobileFrontEnd.git
+    git clone -b developer https://github.com/EnvyGod-dev/informationSystem.git
 ```
 
 ## SSH config git бол
 ```sh
-    git clone -b developer git@github.com:PsychicWorms/negunMobileFrontEnd.git
+    git clone -b developer git@github.com:EnvyGod-dev/informationSystem.git
 ```
 
 <p align="center">
@@ -28,12 +28,12 @@
 
 ## HTTP config git бол
 ```sh
-    git clone   https://github.com/PsychicWorms/negunMobileFrontEnd.git
+    git clone  https://github.com/EnvyGod-dev/informationSystem.git
 ```
 
 ## SSH config git бол
 ```sh
-    git clone  git@github.com:PsychicWorms/negunMobileFrontEnd.git
+    git clone  git@github.com:EnvyGod-dev/informationSystem.git
 ```
 
 ## 📝 Агуулга
