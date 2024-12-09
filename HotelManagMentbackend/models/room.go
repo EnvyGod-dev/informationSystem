@@ -9,6 +9,7 @@ type Room struct {
 	RoomType    string    `json:"RoomType"`
 	Price       float64   `json:"Price"`
 	IsAvailable bool      `json:"IsAvailable"`
+	RoomImg     string    `json:"RoomImg"`
 	CreatedAt   time.Time `json:"CreatedAt"`
 }
 

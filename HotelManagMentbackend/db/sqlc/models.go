@@ -49,6 +49,7 @@ type Room struct {
 	RoomType    string
 	Price       string
 	IsAvailable bool
+	RoomImg     string
 	CreatedAt   time.Time
 }
 

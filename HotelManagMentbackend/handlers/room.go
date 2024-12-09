@@ -26,6 +26,7 @@ func (hd *Handlers) CreateRoom(ctx *fiber.Ctx) error {
 		RoomType:    rqst.RoomType,
 		Price:       priceStr,
 		IsAvailable: rqst.IsAvailable,
+		RoomImg:     rqst.RoomImg,
 	})
 	if err != nil {
 		slog.Error("unable to create room", slog.Any("err", err))

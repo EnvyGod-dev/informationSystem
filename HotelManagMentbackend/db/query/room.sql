@@ -1,36 +1,39 @@
 -- name: CreateRoom :one
-INSERT INTO "Room" (
-    "HotelID",
-    "RoomType",
-    "Price",
-    "IsAvailable"
-) VALUES (
-    sqlc.arg('HotelID'),
-    sqlc.arg('RoomType'),
-    sqlc.arg('Price'),
-    sqlc.arg('IsAvailable')
-) RETURNING *;
-
+INSERT INTO
+    "Room" (
+        "HotelID",
+        "RoomType",
+        "Price",
+        "IsAvailable",
+        "RoomImg"
+    )
+VALUES
+    (
+        sqlc.arg('HotelID'),
+        sqlc.arg('RoomType'),
+        sqlc.arg('Price'),
+        sqlc.arg('IsAvailable'),
+        sqlc.arg('RoomImg')
+    ) RETURNING *;
 
 -- name: GetRoomsByHotelID :many
-SELECT 
+SELECT
     r."ID" AS RoomID,
     r."RoomType",
     r."Price",
     r."IsAvailable",
     h."Name" AS HotelName,
     h."Address" AS HotelAddress
-FROM 
+FROM
     "Room" r
-JOIN 
-    "Hotel" h ON r."HotelID" = h."ID"
-WHERE 
-    h."ID" = $1
-ORDER BY 
+    JOIN "Hotel" h ON r."HotelID" = h."ID"
+WHERE
+    h."ID" = sqlc.arg('ID')
+ORDER BY
     r."Price" ASC;
 
 -- name: GetAllRoomsWithHotels :many
-SELECT 
+SELECT
     r."ID" AS RoomID,
     r."RoomType",
     r."Price",
@@ -38,12 +41,12 @@ SELECT
     h."ID" AS HotelID,
     h."Name" AS HotelName,
     h."Address" AS HotelAddress
-FROM 
+FROM
     "Room" r
-JOIN 
-    "Hotel" h ON r."HotelID" = h."ID"
-ORDER BY 
-    h."Name" ASC, r."Price" ASC;
+    JOIN "Hotel" h ON r."HotelID" = h."ID"
+ORDER BY
+    h."Name" ASC,
+    r."Price" ASC;
 
 -- name: UpdateByHotelPrice :exec
 UPDATE

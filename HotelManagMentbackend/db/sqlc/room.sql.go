@@ -10,17 +10,22 @@ import (
 )
 
 const createRoom = `-- name: CreateRoom :one
-INSERT INTO "Room" (
-    "HotelID",
-    "RoomType",
-    "Price",
-    "IsAvailable"
-) VALUES (
-    $1,
-    $2,
-    $3,
-    $4
-) RETURNING "ID", "HotelID", "RoomType", "Price", "IsAvailable", "Created_At"
+INSERT INTO
+    "Room" (
+        "HotelID",
+        "RoomType",
+        "Price",
+        "IsAvailable",
+        "RoomImg"
+    )
+VALUES
+    (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5
+    ) RETURNING "ID", "HotelID", "RoomType", "Price", "IsAvailable", "RoomImg", "Created_At"
 `
 
 type CreateRoomParams struct {
@@ -28,6 +33,7 @@ type CreateRoomParams struct {
 	RoomType    string
 	Price       string
 	IsAvailable bool
+	RoomImg     string
 }
 
 func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, error) {
@@ -36,6 +42,7 @@ func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, e
 		arg.RoomType,
 		arg.Price,
 		arg.IsAvailable,
+		arg.RoomImg,
 	)
 	var i Room
 	err := row.Scan(
@@ -44,13 +51,14 @@ func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) (Room, e
 		&i.RoomType,
 		&i.Price,
 		&i.IsAvailable,
+		&i.RoomImg,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getAllRoomsWithHotels = `-- name: GetAllRoomsWithHotels :many
-SELECT 
+SELECT
     r."ID" AS RoomID,
     r."RoomType",
     r."Price",
@@ -58,12 +66,12 @@ SELECT
     h."ID" AS HotelID,
     h."Name" AS HotelName,
     h."Address" AS HotelAddress
-FROM 
+FROM
     "Room" r
-JOIN 
-    "Hotel" h ON r."HotelID" = h."ID"
-ORDER BY 
-    h."Name" ASC, r."Price" ASC
+    JOIN "Hotel" h ON r."HotelID" = h."ID"
+ORDER BY
+    h."Name" ASC,
+    r."Price" ASC
 `
 
 type GetAllRoomsWithHotelsRow struct {
@@ -108,20 +116,19 @@ func (q *Queries) GetAllRoomsWithHotels(ctx context.Context) ([]GetAllRoomsWithH
 }
 
 const getRoomsByHotelID = `-- name: GetRoomsByHotelID :many
-SELECT 
+SELECT
     r."ID" AS RoomID,
     r."RoomType",
     r."Price",
     r."IsAvailable",
     h."Name" AS HotelName,
     h."Address" AS HotelAddress
-FROM 
+FROM
     "Room" r
-JOIN 
-    "Hotel" h ON r."HotelID" = h."ID"
-WHERE 
+    JOIN "Hotel" h ON r."HotelID" = h."ID"
+WHERE
     h."ID" = $1
-ORDER BY 
+ORDER BY
     r."Price" ASC
 `
 
