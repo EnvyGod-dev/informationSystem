@@ -10,24 +10,30 @@ import (
 )
 
 const createHotel = `-- name: CreateHotel :one
-INSERT INTO "Hotel" (
-    "Name",
-    "Address",
-    "City",
-    "Rating"
-) VALUES (
-    $1,
-    $2,
-    $3,
-    $4
-) RETURNING "ID", "Name", "Address", "City", "Rating", "Created_At"
+INSERT INTO
+    "Hotel" (
+        "Name",
+        "Address",
+        "City",
+        "Rating",
+        "HotelImg"
+    )
+VALUES
+    (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5
+    ) RETURNING "ID", "Name", "Address", "City", "Rating", "HotelImg", "Created_At"
 `
 
 type CreateHotelParams struct {
-	Name    string
-	Address string
-	City    string
-	Rating  string
+	Name     string
+	Address  string
+	City     string
+	Rating   string
+	HotelImg string
 }
 
 func (q *Queries) CreateHotel(ctx context.Context, arg CreateHotelParams) (Hotel, error) {
@@ -36,6 +42,7 @@ func (q *Queries) CreateHotel(ctx context.Context, arg CreateHotelParams) (Hotel
 		arg.Address,
 		arg.City,
 		arg.Rating,
+		arg.HotelImg,
 	)
 	var i Hotel
 	err := row.Scan(
@@ -44,6 +51,7 @@ func (q *Queries) CreateHotel(ctx context.Context, arg CreateHotelParams) (Hotel
 		&i.Address,
 		&i.City,
 		&i.Rating,
+		&i.HotelImg,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -63,12 +71,13 @@ func (q *Queries) DeleteFromHotelID(ctx context.Context, id int32) error {
 
 const findByHotelName = `-- name: FindByHotelName :one
 SELECT
-    "ID", "Name", "Address", "City", "Rating", "Created_At"
+    "ID", "Name", "Address", "City", "Rating", "HotelImg", "Created_At"
 FROM
     "Hotel"
 WHERE
     "Name" = $1
-LIMIT 1
+LIMIT
+    1
 `
 
 func (q *Queries) FindByHotelName(ctx context.Context, name string) (Hotel, error) {
@@ -80,14 +89,15 @@ func (q *Queries) FindByHotelName(ctx context.Context, name string) (Hotel, erro
 		&i.Address,
 		&i.City,
 		&i.Rating,
+		&i.HotelImg,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getListHotel = `-- name: GetListHotel :many
-SELECT  
-    "ID", "Name", "Address", "City", "Rating", "Created_At"
+SELECT
+    "ID", "Name", "Address", "City", "Rating", "HotelImg", "Created_At"
 FROM
     "Hotel"
 ORDER BY
@@ -109,6 +119,7 @@ func (q *Queries) GetListHotel(ctx context.Context) ([]Hotel, error) {
 			&i.Address,
 			&i.City,
 			&i.Rating,
+			&i.HotelImg,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -126,7 +137,7 @@ func (q *Queries) GetListHotel(ctx context.Context) ([]Hotel, error) {
 
 const getListRating = `-- name: GetListRating :many
 SELECT
-    "ID", "Name", "Address", "City", "Rating", "Created_At"
+    "ID", "Name", "Address", "City", "Rating", "HotelImg", "Created_At"
 FROM
     "Hotel"
 ORDER BY
@@ -148,6 +159,7 @@ func (q *Queries) GetListRating(ctx context.Context) ([]Hotel, error) {
 			&i.Address,
 			&i.City,
 			&i.Rating,
+			&i.HotelImg,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -183,7 +195,7 @@ func (q *Queries) UpdateByAddress(ctx context.Context, arg UpdateByAddressParams
 }
 
 const updateByName = `-- name: UpdateByName :exec
-UPDATE  
+UPDATE
     "Hotel"
 SET
     "Name" = $1

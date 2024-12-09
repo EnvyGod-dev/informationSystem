@@ -1,18 +1,23 @@
 -- name: CreateHotel :one
-INSERT INTO "Hotel" (
-    "Name",
-    "Address",
-    "City",
-    "Rating"
-) VALUES (
-    sqlc.arg('Name'),
-    sqlc.arg('Address'),
-    sqlc.arg('City'),
-    sqlc.arg('Rating')
-) RETURNING *;
+INSERT INTO
+    "Hotel" (
+        "Name",
+        "Address",
+        "City",
+        "Rating",
+        "HotelImg"
+    )
+VALUES
+    (
+        sqlc.arg('Name'),
+        sqlc.arg('Address'),
+        sqlc.arg('City'),
+        sqlc.arg('Rating'),
+        sqlc.arg('HotelImg')
+    ) RETURNING *;
 
 -- name: GetListHotel :many
-SELECT  
+SELECT
     *
 FROM
     "Hotel"
@@ -34,7 +39,8 @@ FROM
     "Hotel"
 WHERE
     "Name" = sqlc.arg('Name')
-LIMIT 1;
+LIMIT
+    1;
 
 -- name: UpdateByRating :exec
 UPDATE
@@ -45,7 +51,7 @@ WHERE
     "ID" = sqlc.arg('ID');
 
 -- name: UpdateByName :exec
-UPDATE  
+UPDATE
     "Hotel"
 SET
     "Name" = sqlc.arg('Name')

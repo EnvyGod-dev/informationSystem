@@ -24,10 +24,11 @@ func (hd *Handlers) CreateHotel(ctx *fiber.Ctx) error {
 
 	// Зочид буудал үүсгэх
 	hotel, err := queries.CreateHotel(ctx.Context(), db.CreateHotelParams{
-		Name:    rqst.Name,
-		Address: rqst.Address,
-		City:    rqst.City,
-		Rating:  ratingStr,
+		Name:     rqst.Name,
+		Address:  rqst.Address,
+		City:     rqst.City,
+		Rating:   ratingStr,
+		HotelImg: rqst.HotelImg,
 	})
 	if err != nil {
 		slog.Error("unable to create hotel", slog.Any("err", err))

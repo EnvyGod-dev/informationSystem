@@ -25,6 +25,7 @@ type Hotel struct {
 	Address   string
 	City      string
 	Rating    string
+	HotelImg  string
 	CreatedAt time.Time
 }
 
