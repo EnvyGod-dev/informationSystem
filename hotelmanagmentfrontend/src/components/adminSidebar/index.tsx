@@ -22,7 +22,7 @@ const AdminSidebar = () => {
 
     const menuItems = [
         { text: 'Dashboard', icon: <PeopleIcon />, path: adminDashboard },
-        { text: 'Хэрэглэгчийн бүртгэл', icon: <PeopleIcon />, path: adminUser },
+        // { text: 'Хэрэглэгчийн бүртгэл', icon: <PeopleIcon />, path: adminUser },
         { text: 'Зочид буудал', icon: <HotelIcon />, path: adminHotel },
         { text: 'Өрөө', icon: <RoomServiceIcon />, path: adminRoom },
         { text: 'Захиалга', icon: <ReceiptIcon />, path: adminOrder },

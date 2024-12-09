@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     AppBar,
     Toolbar,
@@ -9,15 +9,58 @@ import {
     InputBase,
     IconButton,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import SearchIcon from '@mui/icons-material/Search';
 
 const Header = () => {
     const router = useRouter();
+    const pathname = usePathname(); // Get the current path
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const handleLoginClick = () => {
+    // Check if the user is logged in and token is valid
+    useEffect(() => {
+        const checkAuthStatus = () => {
+            const token = localStorage.getItem('userToken');
+            const tokenExpiry = localStorage.getItem('tokenExpiry');
+            const currentTime = new Date().getTime();
+
+            if (token && tokenExpiry && currentTime < Number(tokenExpiry)) {
+                setIsLoggedIn(true);
+            } else {
+                // If token is invalid or expired, clear storage and set logged out state
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('tokenExpiry');
+                setIsLoggedIn(false);
+            }
+        };
+
+        checkAuthStatus();
+
+        // Listen to local storage changes (e.g., logout from other tabs)
+        const handleStorageChange = () => {
+            checkAuthStatus();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('tokenExpiry');
+        setIsLoggedIn(false);
         router.push('/auth/login');
     };
+
+    const navigationLinks = [
+        { label: 'Эхлэл', path: '/' },
+        { label: 'Зочид Буудал', path: '/hotel' },
+        { label: 'Өрөөний захиалга', path: '/room' },
+        { label: 'Миний захиалга', path: '/order' },
+    ];
 
     return (
         <AppBar
@@ -47,7 +90,7 @@ const Header = () => {
                             fontSize: '20px',
                         }}
                     >
-                        Hotel Managment
+                        Hotel Management
                     </Typography>
                 </Box>
 
@@ -61,46 +104,21 @@ const Header = () => {
                         justifyContent: 'center',
                     }}
                 >
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            cursor: 'pointer',
-                            fontWeight: 500,
-                        }}
-                        onClick={() => router.push('/')}
-                    >
-                        Эхлэл
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            cursor: 'pointer',
-                            fontWeight: 500,
-                        }}
-                        onClick={() => router.push('/hotel')}
-                    >
-                        Зочид Буудал
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            cursor: 'pointer',
-                            fontWeight: 500,
-                        }}
-                        onClick={() => router.push('/booking')}
-                    >
-                        Өрөөний захиалга
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            cursor: 'pointer',
-                            fontWeight: 500,
-                        }}
-                        onClick={() => router.push('/orders')}
-                    >
-                        Миний захиалга
-                    </Typography>
+                    {navigationLinks.map((link) => (
+                        <Typography
+                            key={link.path}
+                            variant="body1"
+                            sx={{
+                                cursor: 'pointer',
+                                fontWeight: 500,
+                                color: pathname === link.path ? 'blue' : 'black', // Highlight active link
+                                textDecoration: pathname === link.path ? 'underline' : 'none', // Add underline to active link
+                            }}
+                            onClick={() => router.push(link.path)}
+                        >
+                            {link.label}
+                        </Typography>
+                    ))}
                 </Box>
 
                 {/* Search Bar */}
@@ -130,19 +148,34 @@ const Header = () => {
                     />
                 </Box>
 
-                {/* Login Button */}
-                <Button
-                    color="inherit"
-                    onClick={handleLoginClick}
-                    sx={{
-                        ml: 3,
-                        fontWeight: 500,
-                        textTransform: 'capitalize',
-                        fontSize: '16px',
-                    }}
-                >
-                    Нэвтрэх
-                </Button>
+                {/* Login/Logout Button */}
+                {isLoggedIn ? (
+                    <Button
+                        color="inherit"
+                        onClick={handleLogout}
+                        sx={{
+                            ml: 3,
+                            fontWeight: 500,
+                            textTransform: 'capitalize',
+                            fontSize: '16px',
+                        }}
+                    >
+                        Гарах
+                    </Button>
+                ) : (
+                    <Button
+                        color="inherit"
+                        onClick={() => router.push('/auth/login')}
+                        sx={{
+                            ml: 3,
+                            fontWeight: 500,
+                            textTransform: 'capitalize',
+                            fontSize: '16px',
+                        }}
+                    >
+                        Нэвтрэх
+                    </Button>
+                )}
             </Toolbar>
         </AppBar>
     );

@@ -26,7 +26,7 @@ const AdminRoom = () => {
     const [openModal, setOpenModal] = useState(false);
     const [editingRoom, setEditingRoom] = useState<any>(null);
     const [formData, setFormData] = useState({
-        HotelId: '', // ID of the hotel
+        HotelId: '',
         RoomType: '',
         Price: '',
         IsAvailable: 'true',
@@ -39,9 +39,9 @@ const AdminRoom = () => {
             setLoading(true);
             try {
                 const roomList = await GetListRoom();
-                setRooms(roomList);
-            } catch (error: any) {
-                console.error('Error fetching rooms:', error.message);
+                setRooms(roomList || []); // Ensure roomList is an array
+            } catch (error) {
+                console.error('Error fetching rooms:', error);
                 alert('Failed to load rooms');
             } finally {
                 setLoading(false);
@@ -58,7 +58,7 @@ const AdminRoom = () => {
                 HotelId: room.HotelId.toString(),
                 RoomType: room.RoomType,
                 Price: room.Price.toString(),
-                IsAvailable: room.IsAvailable.toString(),
+                IsAvailable: room.IsAvailable ? 'true' : 'false',
                 RoomImg: room.RoomImg,
             });
             setImagePreview(room.RoomImg);
@@ -75,9 +75,52 @@ const AdminRoom = () => {
         setEditingRoom(null);
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+    const handleSubmit = async () => {
+        if (!formData.HotelId || !formData.RoomType || !formData.Price || !formData.RoomImg) {
+            alert('All fields and image are required');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            if (editingRoom) {
+                await UpdateRoomByID({
+                    id: editingRoom.ID,
+                    price: parseFloat(formData.Price),
+                });
+                setRooms((prev) =>
+                    prev.map((room) =>
+                        room.ID === editingRoom.ID
+                            ? { ...room, ...formData, Price: parseFloat(formData.Price), IsAvailable: formData.IsAvailable === 'true' }
+                            : room
+                    )
+                );
+                alert('Room updated successfully');
+            } else {
+                await CreateRoom({
+                    HotelId: parseInt(formData.HotelId),
+                    RoomType: formData.RoomType,
+                    Price: parseFloat(formData.Price),
+                    IsAvailable: formData.IsAvailable === 'true',
+                    RoomImg: formData.RoomImg,
+                });
+                const newRoom = {
+                    ID: rooms.length + 1,
+                    ...formData,
+                    Price: parseFloat(formData.Price),
+                    IsAvailable: formData.IsAvailable === 'true',
+                };
+                setRooms((prev) => [...prev, newRoom]);
+                alert('Room added successfully');
+            }
+            setOpenModal(false);
+        } catch (error: any) {
+            console.error('Error saving room:', error.message || 'Unknown error');
+            alert('Failed to save room');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,49 +133,6 @@ const AdminRoom = () => {
                 setImagePreview(base64);
             };
             reader.readAsDataURL(file);
-        }
-    };
-
-    const handleSubmit = async () => {
-        if (!formData.HotelId || !formData.RoomType || !formData.Price || !formData.RoomImg) {
-            alert('All fields and image are required');
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            if (editingRoom) {
-                // Update room
-                await UpdateRoomByID({
-                    id: editingRoom.id,
-                    price: parseFloat(formData.Price),
-                });
-                setRooms((prev) =>
-                    prev.map((room) =>
-                        room.ID === editingRoom.ID
-                            ? { ...room, ...formData, Price: parseFloat(formData.Price) }
-                            : room
-                    )
-                );
-                alert('Room updated successfully');
-            } else {
-                // Create new room
-                await CreateRoom({
-                    HotelId: parseInt(formData.HotelId),
-                    RoomType: formData.RoomType,
-                    Price: parseFloat(formData.Price),
-                    IsAvailable: formData.IsAvailable === 'true',
-                    RoomImg: formData.RoomImg,
-                });
-                alert('Room added successfully');
-            }
-            setOpenModal(false);
-        } catch (error: any) {
-            console.error('Error saving room:', error.message || 'Unknown error');
-            alert('Failed to save room');
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -163,23 +163,25 @@ const AdminRoom = () => {
                                 <TableCell>Price</TableCell>
                                 <TableCell>Available</TableCell>
                                 <TableCell>Image</TableCell>
-                                <TableCell>Actions</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {rooms.length > 0 ? (
-                                rooms.map((room) => (
-                                    <TableRow key={room.ID}>
-                                        <TableCell>{room.ID}</TableCell>
-                                        <TableCell>{room.HotelId}</TableCell>
+                                rooms.map((room, index) => (
+                                    <TableRow key={room.Roomid || index}>
+                                        <TableCell>{room.Roomid}</TableCell>
+                                        <TableCell>{room.Hotelid}</TableCell>
                                         <TableCell>{room.RoomType}</TableCell>
                                         <TableCell>{room.Price}</TableCell>
                                         <TableCell>{room.IsAvailable ? 'Yes' : 'No'}</TableCell>
                                         <TableCell>
-                                            <img src={room.RoomImg} alt={room.RoomType} style={{ width: '100px' }} />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button onClick={() => handleOpenModal(room)}>Edit</Button>
+                                            {room.RoomImg && (
+                                                <img
+                                                    src={room.RoomImg}
+                                                    alt={room.RoomType}
+                                                    style={{ width: '100px', height: 'auto' }}
+                                                />
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -204,7 +206,7 @@ const AdminRoom = () => {
                         name="HotelId"
                         fullWidth
                         value={formData.HotelId}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({ ...formData, HotelId: e.target.value })}
                     />
                     <TextField
                         margin="dense"
@@ -212,7 +214,7 @@ const AdminRoom = () => {
                         name="RoomType"
                         fullWidth
                         value={formData.RoomType}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({ ...formData, RoomType: e.target.value })}
                     />
                     <TextField
                         margin="dense"
@@ -221,7 +223,7 @@ const AdminRoom = () => {
                         fullWidth
                         type="number"
                         value={formData.Price}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({ ...formData, Price: e.target.value })}
                     />
                     <TextField
                         margin="dense"
@@ -229,7 +231,7 @@ const AdminRoom = () => {
                         name="IsAvailable"
                         fullWidth
                         value={formData.IsAvailable}
-                        onChange={handleChange}
+                        onChange={(e) => setFormData({ ...formData, IsAvailable: e.target.value })}
                     />
                     <Button variant="contained" component="label" sx={{ mt: 2 }}>
                         Upload Image

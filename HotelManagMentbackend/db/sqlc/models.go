@@ -37,12 +37,6 @@ type Payment struct {
 	Status      string
 }
 
-type Role struct {
-	ID          int32
-	RoleName    string
-	Description string
-}
-
 type Room struct {
 	ID          int32
 	HotelID     int32
@@ -51,14 +45,6 @@ type Room struct {
 	IsAvailable bool
 	RoomImg     string
 	CreatedAt   time.Time
-}
-
-type Service struct {
-	ID          int32
-	RoomID      int32
-	Description string
-	RequestedAt time.Time
-	Status      string
 }
 
 type User struct {
@@ -75,10 +61,4 @@ type User struct {
 	IsHouseKeeper    bool
 	IsActive         bool
 	CreatedAt        time.Time
-}
-
-type UserRole struct {
-	UserID     int32
-	RoleID     int32
-	AssignedAt time.Time
 }

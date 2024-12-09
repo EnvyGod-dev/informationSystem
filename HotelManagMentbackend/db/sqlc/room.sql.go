@@ -132,7 +132,8 @@ SELECT
     r."IsAvailable",
     r."RoomImg",
     h."Name" AS HotelName,
-    h."Address" AS HotelAddress
+    h."Address" AS HotelAddress,
+    h."HotelImg"
 FROM
     "Room" r
     JOIN "Hotel" h ON r."HotelID" = h."ID"
@@ -150,6 +151,7 @@ type GetRoomsByHotelIDRow struct {
 	RoomImg      string
 	Hotelname    string
 	Hoteladdress string
+	HotelImg     string
 }
 
 func (q *Queries) GetRoomsByHotelID(ctx context.Context, id int32) ([]GetRoomsByHotelIDRow, error) {
@@ -169,6 +171,7 @@ func (q *Queries) GetRoomsByHotelID(ctx context.Context, id int32) ([]GetRoomsBy
 			&i.RoomImg,
 			&i.Hotelname,
 			&i.Hoteladdress,
+			&i.HotelImg,
 		); err != nil {
 			return nil, err
 		}

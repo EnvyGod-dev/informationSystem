@@ -69,9 +69,15 @@ func IssueToken(UserId int32, isAdmin, isUser, isReception, isFinance bool, kp *
 // Additionally, checks if the user is an Admin or Super Admin.
 func VerifyToken(tokenStr string, kp *RsaKey) (*Payload, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Payload{}, func(token *jwt.Token) (interface{}, error) {
-		if kp == nil {
-			return nil, errors.New("RSA key not provided")
+		if kp == nil || kp.GetK2() == nil {
+			return nil, errors.New("RSA public key not provided")
 		}
+
+		// Алгоритмыг шалгах
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+
 		return kp.GetK2(), nil
 	})
 

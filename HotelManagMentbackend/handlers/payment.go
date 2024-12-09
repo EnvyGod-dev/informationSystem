@@ -104,11 +104,11 @@ func (hd *Handlers) GetDetailedPayments(ctx *fiber.Ctx) error {
 func (hd *Handlers) CreateUserPayment(ctx *fiber.Ctx) error {
 	queries, _, _ := hd.queries()
 
-	// Context-аас хэрэглэгчийн ID-г авах
-	_, err := secure.GetCurrentUserID(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"err": "Unauthorized"})
-	}
+	// // Context-аас хэрэглэгчийн ID-г авах
+	// _, err := secure.GetCurrentUserID(ctx)
+	// if err != nil {
+	// 	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"err": "Unauthorized"})
+	// }
 
 	// Хүсэлтийг задлах
 	var rqst struct {

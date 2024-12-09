@@ -41,7 +41,7 @@ const AdminHotel = () => {
             setLoading(true);
             try {
                 const hotelList = await GetListHotel();
-                setHotels(hotelList);
+                setHotels(hotelList || []); // Ensure hotels is always an array
             } catch (error: any) {
                 console.error('Error fetching hotels:', error.message);
                 alert('Failed to load hotels');
@@ -209,7 +209,7 @@ const AdminHotel = () => {
                             ) : (
                                 <TableRow>
                                     <TableCell colSpan={7} align="center">
-                                        No hotels found
+                                        Бүртгэгдсэн буудал байхгүй байна
                                     </TableCell>
                                 </TableRow>
                             )}

@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState } from 'react';
 import {
     Box,
@@ -8,8 +9,6 @@ import {
     Container,
     CssBaseline,
     Avatar,
-    Grid,
-    Link,
     Dialog,
     DialogActions,
     DialogContent,
@@ -25,37 +24,57 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
+    const [loading, setLoading] = useState(false); // Loading state
     const router = useRouter();
 
     const handleCloseModal = () => {
         setModalOpen(false);
-        if (modalMessage === 'Амжилттай нэвтэрлээ...') {
+        if (modalMessage.includes('Амжилттай')) {
             router.push('/'); // Redirect after successful login
         }
     };
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
+        if (loading) return; // Prevent multiple submissions
 
-        if (!username || !password) {
-            setModalMessage('Please fill out all fields.');
+        if (!username.trim() || !password.trim()) {
+            setModalMessage('Бүх талбаруудыг бөглөнө үү.');
             setModalOpen(true);
             return;
         }
 
+        setLoading(true);
+
         try {
-            await loginUser({
+            const response = await loginUser({
                 Identifier: username,
                 Password: password,
             });
 
-            // Show success modal
-            setModalMessage('Амжилттай нэвтэрлээ...');
-            setModalOpen(true);
+            // Set token and expiration in localStorage
+            const token = response.Token;
+            if (token) {
+                const expiry = new Date().getTime() + 30 * 60 * 1000; // 30 minutes from now
+                localStorage.setItem('userToken', token);
+                localStorage.setItem('tokenExpiry', expiry.toString());
+
+                // Save user details
+                localStorage.setItem(
+                    'userDetails',
+                    JSON.stringify({ UserID: response.Id, Username: response.UserName })
+                );
+
+                setModalMessage('Амжилттай нэвтэрлээ...');
+                setModalOpen(true);
+            } else {
+                throw new Error('Token not provided in response.');
+            }
         } catch (err: any) {
-            // Show error modal
-            setModalMessage('User-ээс өөр эрхтэй хүмүүс нэвтэрхийг хориглоно.');
+            setModalMessage(err.response?.data?.message || 'Хэрэглэгчийн мэдээлэл эсвэл нууц үг буруу байна.');
             setModalOpen(true);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -106,25 +125,10 @@ const Login = () => {
                         fullWidth
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
+                        disabled={loading}
                     >
-                        Log in
+                        {loading ? 'Logging in...' : 'Log in'}
                     </Button>
-                    <Grid container>
-                        <Grid item xs>
-                            <Link href="#" variant="body2">
-                                Forgot password?
-                            </Link>
-                        </Grid>
-                        <Grid item>
-                            <Link
-                                onClick={() => router.push('/auth/signup')}
-                                variant="body2"
-                                sx={{ cursor: 'pointer' }}
-                            >
-                                Don't have an account? Sign up
-                            </Link>
-                        </Grid>
-                    </Grid>
                 </Box>
             </Box>
 

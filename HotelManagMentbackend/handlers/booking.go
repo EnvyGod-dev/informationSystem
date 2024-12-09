@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	db "namuunzul/db/sqlc"
 	"namuunzul/models"
-	"namuunzul/utils/secure"
 	"strconv"
 	"time"
 
@@ -162,10 +161,10 @@ func (hd *Handlers) UserCreateBooking(ctx *fiber.Ctx) error {
 	queries, _, _ := hd.queries()
 
 	// Token-аас хэрэглэгчийн ID-г авах
-	userID, err := secure.GetCurrentUserID(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"err": "Invalid user token"})
-	}
+	// userID, err := secure.GetCurrentUserID(ctx)
+	// if err != nil {
+	// 	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"err": "Invalid user token"})
+	// }
 
 	// Хүсэлтийг задлах
 	var rqst models.CreateBookingRequest
@@ -174,7 +173,7 @@ func (hd *Handlers) UserCreateBooking(ctx *fiber.Ctx) error {
 	}
 
 	// UserID-г токеноос авах тул хүсэлтэд байгаа утгыг хүчингүй болгоно
-	rqst.UserID = userID
+	// rqst.UserID = userID
 
 	totalPriceStr := strconv.FormatFloat(rqst.TotalPrice, 'f', -1, 64)
 	// Захиалга үүсгэх
@@ -196,14 +195,16 @@ func (hd *Handlers) UserCreateBooking(ctx *fiber.Ctx) error {
 func (hd *Handlers) GetUserBookings(ctx *fiber.Ctx) error {
 	queries, _, _ := hd.queries()
 
-	// Token-аас хэрэглэгчийн ID-г авах
-	userID, err := secure.GetCurrentUserID(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"err": "Invalid user token"})
-	}
+	UserIDCTX := ctx.Params("Id")
+	UserID, err := strconv.Atoi(UserIDCTX)
+	// // Token-аас хэрэглэгчийн ID-г авах
+	// userID, err := secure.GetCurrentUserID(ctx)
+	// if err != nil {
+	// 	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"err": "Invalid user token"})
+	// }
 
 	// Хэрэглэгчийн захиалгыг авах
-	bookings, err := queries.GetUserBookings(ctx.Context(), userID)
+	bookings, err := queries.GetUserBookings(ctx.Context(), int32(UserID))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"err": "Failed to retrieve bookings"})
 	}
@@ -215,10 +216,10 @@ func (hd *Handlers) DeleteUserBooking(ctx *fiber.Ctx) error {
 	queries, _, _ := hd.queries()
 
 	// Token-аас хэрэглэгчийн ID-г авах
-	userID, err := secure.GetCurrentUserID(ctx)
-	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"err": "Invalid user token"})
-	}
+	// userID, err := secure.GetCurrentUserID(ctx)
+	// if err != nil {
+	// 	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"err": "Invalid user token"})
+	// }
 
 	// Захиалгын ID-г авах
 	bookingID, err := ctx.ParamsInt("id")
@@ -229,7 +230,7 @@ func (hd *Handlers) DeleteUserBooking(ctx *fiber.Ctx) error {
 	// Захиалга устгах эрхийг шалгах
 	err = queries.DeleteBookingIfOwner(ctx.Context(), db.DeleteBookingIfOwnerParams{
 		ID:     int32(bookingID),
-		UserID: userID,
+		UserID: int32(bookingID),
 	})
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"err": "Failed to delete booking"})

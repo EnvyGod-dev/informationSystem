@@ -50,11 +50,11 @@ export const CreateRoom = async (CreateRoom: CreateRoom): Promise<void> => {
     }
 };
 
-export const GetListRoom = async ():Promise<Room[]>=> {
+export const GetListRoom = async (): Promise<Room[]> => {
     try {
-        const token = localStorage.getItem('adminToken')
-        if(!token) {
-            throw new Error('Authoraztion token is missing')
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            throw new Error('Authorization token is missing');
         }
 
         const response = await axios.get<Room[]>(`${RoomBaseUrl}`, {
@@ -64,17 +64,14 @@ export const GetListRoom = async ():Promise<Room[]>=> {
             },
         });
 
-        if (response.status === 200 && response.data) {
-            console.log('Room list fetched successfully:', response.data);
-            return response.data;
-        } else {
-            throw new Error('Failed to fetch rooms: Unexpected response');
-        }
+        console.log('Fetched Rooms:', response.data); // Log the response
+        return response.data;
     } catch (error: any) {
-        console.error('Error fetching rooms:', error.message || 'Unknown error');
+        console.error('Error fetching rooms:', error.message || error.response?.data?.message || 'Unknown error');
         throw new Error(error.response?.data?.message || 'Failed to fetch rooms');
     }
-    }
+};
+
 
 export const UpdateRoomByID = async (updateData: UpdateRoom): Promise<void> => {
     try {

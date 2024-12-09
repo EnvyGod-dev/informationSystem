@@ -11,21 +11,24 @@ import (
 )
 
 const createBooking = `-- name: CreateBooking :one
-INSERT INTO "Booking" (
-    "UserID",
-    "RoomID",
-    "StartDate",
-    "EndDate",
-    "TotalPrice",
-    "Status"
-) VALUES (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5,
-    $6
-) RETURNING "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
+INSERT INTO
+    "Booking" (
+        "UserID",
+        "RoomID",
+        "StartDate",
+        "EndDate",
+        "TotalPrice",
+        "Status"
+    )
+VALUES
+    (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6
+    ) RETURNING "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
 `
 
 type CreateBookingParams struct {
@@ -61,9 +64,9 @@ func (q *Queries) CreateBooking(ctx context.Context, arg CreateBookingParams) (B
 }
 
 const deleteBooking = `-- name: DeleteBooking :exec
-DELETE FROM 
+DELETE FROM
     "Booking"
-WHERE 
+WHERE
     "ID" = $1
 `
 
@@ -73,11 +76,11 @@ func (q *Queries) DeleteBooking(ctx context.Context, id int32) error {
 }
 
 const deleteBookingIfOwner = `-- name: DeleteBookingIfOwner :exec
-DELETE FROM 
+DELETE FROM
     "Booking"
-WHERE 
-    "ID" = $1 AND
-    "UserID" = $2
+WHERE
+    "ID" = $1
+    AND "UserID" = $2
 `
 
 type DeleteBookingIfOwnerParams struct {
@@ -91,11 +94,11 @@ func (q *Queries) DeleteBookingIfOwner(ctx context.Context, arg DeleteBookingIfO
 }
 
 const getActiveOrNewBookings = `-- name: GetActiveOrNewBookings :many
-SELECT 
+SELECT
     "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
-FROM 
+FROM
     "Booking"
-WHERE 
+WHERE
     "Status" IN ('active', 'new')
 `
 
@@ -131,12 +134,53 @@ func (q *Queries) GetActiveOrNewBookings(ctx context.Context) ([]Booking, error)
 	return items, nil
 }
 
-const getBookingsOrderedByStartDate = `-- name: GetBookingsOrderedByStartDate :many
-SELECT 
+const getBookingUserId = `-- name: GetBookingUserId :many
+SELECT
     "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
-FROM 
+FROM
     "Booking"
-ORDER BY 
+WHERE
+    "UserID" = $1
+`
+
+func (q *Queries) GetBookingUserId(ctx context.Context, userid int32) ([]Booking, error) {
+	rows, err := q.db.QueryContext(ctx, getBookingUserId, userid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Booking
+	for rows.Next() {
+		var i Booking
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.RoomID,
+			&i.StartDate,
+			&i.EndDate,
+			&i.TotalPrice,
+			&i.Status,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBookingsOrderedByStartDate = `-- name: GetBookingsOrderedByStartDate :many
+SELECT
+    "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
+FROM
+    "Booking"
+ORDER BY
     "StartDate" ASC
 `
 
@@ -173,11 +217,11 @@ func (q *Queries) GetBookingsOrderedByStartDate(ctx context.Context) ([]Booking,
 }
 
 const getExpiredBookings = `-- name: GetExpiredBookings :many
-SELECT 
+SELECT
     "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
-FROM 
+FROM
     "Booking"
-WHERE 
+WHERE
     "EndDate" < CURRENT_DATE
 `
 
@@ -253,11 +297,11 @@ func (q *Queries) GetListBooking(ctx context.Context) ([]Booking, error) {
 }
 
 const getUserBookings = `-- name: GetUserBookings :many
-SELECT 
+SELECT
     "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
-FROM 
+FROM
     "Booking"
-WHERE 
+WHERE
     "UserID" = $1
 `
 
@@ -294,13 +338,13 @@ func (q *Queries) GetUserBookings(ctx context.Context, userid int32) ([]Booking,
 }
 
 const searchBookingsByDateAndPrice = `-- name: SearchBookingsByDateAndPrice :many
-SELECT 
+SELECT
     "ID", "UserID", "RoomID", "StartDate", "EndDate", "TotalPrice", "Status", "Created_At"
-FROM 
+FROM
     "Booking"
-WHERE 
-    "EndDate" >= $1 AND
-    "TotalPrice" >= $2
+WHERE
+    "EndDate" >= $1
+    AND "TotalPrice" >= $2
 `
 
 type SearchBookingsByDateAndPriceParams struct {
@@ -341,14 +385,14 @@ func (q *Queries) SearchBookingsByDateAndPrice(ctx context.Context, arg SearchBo
 }
 
 const updateBooking = `-- name: UpdateBooking :exec
-UPDATE 
+UPDATE
     "Booking"
-SET 
+SET
     "StartDate" = $1,
     "EndDate" = $2,
     "TotalPrice" = $3,
     "Status" = $4
-WHERE 
+WHERE
     "ID" = $5
 `
 

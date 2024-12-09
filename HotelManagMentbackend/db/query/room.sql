@@ -24,7 +24,8 @@ SELECT
     r."IsAvailable",
     r."RoomImg",
     h."Name" AS HotelName,
-    h."Address" AS HotelAddress
+    h."Address" AS HotelAddress,
+    h."HotelImg"
 FROM
     "Room" r
     JOIN "Hotel" h ON r."HotelID" = h."ID"

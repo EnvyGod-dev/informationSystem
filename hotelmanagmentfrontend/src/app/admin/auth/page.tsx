@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box,
     Button,
@@ -19,12 +19,28 @@ import { useRouter } from 'next/navigation';
 import { adminUser } from '../../../utils/api/auth/login';
 import { adminDashboard } from '@/utils/route/path';
 
+const TOKEN_EXPIRY_TIME = 30 * 60 * 1000; // 30 minutes in milliseconds
+
 const AdminLogin = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const router = useRouter();
+
+    useEffect(() => {
+        const token = localStorage.getItem('adminToken');
+        const expiry = localStorage.getItem('adminTokenExpiry');
+        const now = new Date().getTime();
+
+        if (token && expiry && now < Number(expiry)) {
+            router.push(adminDashboard); // Redirect to the dashboard if token is valid
+        } else {
+            // Clear expired token
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminTokenExpiry');
+        }
+    }, [router]);
 
     const handleCloseModal = () => {
         setModalOpen(false);
@@ -53,8 +69,10 @@ const AdminLogin = () => {
                 throw new Error('Token not returned');
             }
 
-            // Save token and notify
+            // Save token and expiry time
+            const expiryTime = new Date().getTime() + TOKEN_EXPIRY_TIME;
             localStorage.setItem('adminToken', response.Token);
+            localStorage.setItem('adminTokenExpiry', expiryTime.toString());
             window.dispatchEvent(new Event('storage')); // Notify other tabs or components of token change
 
             setModalMessage('Амжилттай нэвтэрлээ...');
